@@ -1,0 +1,1313 @@
+html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLOODLINE: 1754–2000 Deluxe Edition</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --panel: #141418;
+    --panel-alt: #1c1c22;
+    --border: #2c2c36;
+    --text: #eceae4;
+    --muted: #98938b;
+    --accent: #d4a359;
+    --danger: #c94a4a;
+    --success: #529e66;
+    --font-serif: 'Georgia', serif;
+    --font-mono: 'Courier New', monospace;
+    --font-sans: system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  #game-container {
+    width: 100%;
+    max-width: 820px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 28px 70px rgba(0,0,0,0.9);
+    position: relative;
+  }
+
+  /* Top Ledger */
+  #ledger {
+    background: #0f0f13;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .meta-info {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-label { color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-val { font-weight: bold; font-size: 0.96rem; margin-top: 2px; transition: color 0.3s; }
+
+  /* Center Stage Split Layout */
+  #stage-wrapper {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 360px;
+  }
+
+  @media (max-width: 680px) {
+    #stage-wrapper { grid-template-columns: 1fr; }
+    #portrait-box { border-right: none !important; border-bottom: 1px solid var(--border); padding: 16px !important; }
+  }
+
+  #portrait-box {
+    background: #101014;
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #portrait-canvas {
+    width: 170px;
+    height: 190px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #08080a;
+    margin-bottom: 12px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+  }
+
+  #portrait-caption {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  #stage {
+    padding: 28px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  #era-badge {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 1.5px;
+  }
+
+  #scene-title {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+    color: #fff;
+  }
+
+  #scene-text {
+    font-size: 1rem;
+    line-height: 1.62;
+    color: #d6d3cd;
+    margin-bottom: 20px;
+  }
+
+  #feedback-box {
+    background: rgba(212, 163, 89, 0.09);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #e2dccf;
+    display: none;
+  }
+
+  /* Choices */
+  #choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .choice-btn {
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 13px 16px;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    background: #272730;
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .choice-text { font-size: 0.94rem; font-weight: 500; line-height: 1.35; }
+  .choice-hint {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* RNG Roll Overlay */
+  #rng-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 8, 10, 0.95);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 32px;
+    z-index: 10;
+  }
+
+  #rng-title { font-family: var(--font-mono); color: var(--accent); margin-bottom: 12px; font-size: 0.9rem; letter-spacing: 2px; }
+  #rng-number { font-family: var(--font-mono); font-size: 3.8rem; font-weight: bold; margin: 12px 0; }
+  #rng-desc { color: var(--muted); max-width: 460px; line-height: 1.55; font-size: 0.95rem; }
+
+  /* Hard Reset / Death Screen */
+  #death-screen {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: #000;
+    color: #fff;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    z-index: 20;
+    animation: fadeIn 1.1s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .death-year { font-family: var(--font-mono); color: var(--danger); font-size: 1.05rem; letter-spacing: 2px; margin-bottom: 12px; }
+  .death-headline { font-family: var(--font-serif); font-size: 1.85rem; margin-bottom: 16px; max-width: 560px; }
+  .death-sub { color: var(--muted); font-size: 0.95rem; max-width: 500px; line-height: 1.6; margin-bottom: 24px; }
+
+  .reset-notice {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+    border-top: 1px solid #222;
+    padding-top: 18px;
+    margin-bottom: 22px;
+    line-height: 1.6;
+  }
+
+  /* Modal (Archive & Ancestral Memory Shop) */
+  .modal-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 11, 14, 0.98);
+    padding: 28px;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 30;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .modal-header h2 { font-family: var(--font-serif); font-size: 1.35rem; color: var(--accent); }
+  .scroll-list {
+    overflow-y: auto;
+    max-height: 310px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .archive-entry {
+    background: var(--panel-alt);
+    border-left: 3px solid var(--danger);
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  .perk-card {
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Footer Bar */
+  #footer-bar {
+    background: #0f0f13;
+    border-top: 1px solid var(--border);
+    padding: 12px 24px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .footer-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .footer-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- Top Ledger -->
+  <div id="ledger">
+    <div class="meta-info">
+      <span id="ui-year">1754</span> • <span id="ui-loc">Atlantic Ocean</span> • <span id="ui-gen">Gen 1: Kojo</span>
+    </div>
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-label">Wealth</span><span class="stat-val" id="stat-wealth">0</span></div>
+      <div class="stat"><span class="stat-label">Visibility</span><span class="stat-val" id="stat-vis">10</span></div>
+      <div class="stat"><span class="stat-label">Resilience</span><span class="stat-val" id="stat-res">55</span></div>
+      <div class="stat"><span class="stat-label">Leverage</span><span class="stat-val" id="stat-lev">5</span></div>
+    </div>
+  </div>
+
+  <!-- Center Stage with Procedural Portrait -->
+  <div id="stage-wrapper">
+    <div id="portrait-box">
+      <canvas id="portrait-canvas" width="170" height="190"></canvas>
+      <div id="portrait-caption">ERA I • 1754<br>The Middle Passage</div>
+    </div>
+
+    <div id="stage">
+      <div>
+        <div id="era-badge">ERA I: THE MIDDLE PASSAGE</div>
+        <h1 id="scene-title">Chains in the Dark</h1>
+        <div id="feedback-box"></div>
+        <p id="scene-text"></p>
+      </div>
+      <div id="choices"></div>
+    </div>
+  </div>
+
+  <!-- RNG Check Overlay -->
+  <div id="rng-overlay">
+    <div id="rng-title">SYSTEMIC PROBABILITY CHECK</div>
+    <div id="rng-number">--</div>
+    <div id="rng-desc">Calculating survival odds...</div>
+  </div>
+
+  <!-- Hard Permadeath Reset Screen -->
+  <div id="death-screen">
+    <div class="death-year" id="death-year">1995 • BLOODLINE TERMINATED</div>
+    <div class="death-headline" id="death-headline">Routine Traffic Stop</div>
+    <div class="death-sub" id="death-sub"></div>
+    <div class="reset-notice">
+      🔊 [Audio: Creaking oak hull and Atlantic swells fade in...]<br>
+      +1 ANCESTRAL MEMORY EARNED • HARD RESETTING TO 1754
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <button class="choice-btn" onclick="openMemoryShopFromDeath()" style="justify-content:center;">
+        <span class="choice-text">✨ Spend Ancestral Memory (<span id="death-mem-count">0</span>)</span>
+      </button>
+      <button class="choice-btn" onclick="restartRun()" style="justify-content:center;">
+        <span class="choice-text">Board the Ship Again (Gen 1)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Ancestral Archive Modal -->
+  <div id="archive-modal" class="modal-overlay">
+    <div>
+      <div class="modal-header">
+        <h2>Ancestral Archive (Fallen Bloodlines)</h2>
+        <button class="footer-btn" onclick="toggleModal('archive-modal')">Close</button>
+      </div>
+      <div id="archive-list" class="scroll-list">
+        <p style="color: var(--muted); font-size: 0.9rem;">No fallen ancestors logged yet in this session.</p>
+      </div>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--muted); margin-top: 12px;">
+      Every permadeath logs the historical policy or systemic event that ended your bloodline.
+    </div>
+  </div>
+
+  <!-- Ancestral Memory Meta-Progression Modal -->
+  <div id="memory-modal" class="modal-overlay">
+    <div>
+      <div class="modal-header">
+        <h2>Ancestral Memory (Meta-Progression)</h2>
+        <button class="footer-btn" onclick="toggleModal('memory-modal')">Close</button>
+      </div>
+      <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 14px;">
+        Available Ancestral Memory: <strong style="color:var(--accent)" id="shop-mem-points">0</strong> pts (Earned when bloodlines fall or reach the Year 2000). Unlocks apply permanently to all future runs.
+      </p>
+      <div id="perks-list" class="scroll-list"></div>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--muted); margin-top: 12px;">
+      Wisdom passed down across resets shifts the starting odds for Generation 1.
+    </div>
+  </div>
+
+  <!-- Footer Bar -->
+  <div id="footer-bar">
+    <span>DELUXE EDITION: 1754 → 2000</span>
+    <div style="display:flex; gap:10px;">
+      <button class="footer-btn" onclick="toggleModal('memory-modal')">✨ Memory (<span id="ui-mem">0</span>)</button>
+      <button class="footer-btn" onclick="toggleModal('archive-modal')">📜 Archive (<span id="ui-arch">0</span>)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const gen1Origins = [
+    { name: "Kojo", res: 55, lev: 5, skin: "#4a2e1b" },
+    { name: "Ama", res: 60, lev: 10, skin: "#3b2314" },
+    { name: "Kwame", res: 50, lev: 5, skin: "#5c3a24" },
+    { name: "Nia", res: 55, lev: 10, skin: "#422817" }
+  ];
+
+  let meta = {
+    memoryPoints: 0,
+    unlockedPerks: []
+  };
+
+  const perksCatalog = [
+    {
+      id: "oral_history",
+      title: "Griots' Oral History",
+      cost: 1,
+      desc: "+15 Starting Resilience for every future Generation 1 ancestor.",
+      apply: (s) => { s.resilience += 15; }
+    },
+    {
+      id: "hidden_primer",
+      title: "Smuggled Literacy Primer",
+      cost: 1,
+      desc: "+15 Starting Leverage (accelerates Underground Railroad & Civil Rights unlocks).",
+      apply: (s) => { s.leverage += 15; }
+    },
+    {
+      id: "mutual_aid_cache",
+      title: "Hidden Mutual Aid Cache",
+      cost: 2,
+      desc: "+15 Starting Wealth & -5 Visibility across early generations.",
+      apply: (s) => { s.wealth += 15; s.visibility = Math.max(0, s.visibility - 5); }
+    }
+  ];
+
+  let state = {
+    year: 1754,
+    location: "Atlantic Ocean",
+    gen: 1,
+    name: "Kojo",
+    skin: "#4a2e1b",
+    eraNum: 1,
+    wealth: 0,
+    visibility: 10,
+    resilience: 55,
+    leverage: 5,
+    cityChoice: "Tulsa",
+    archive: []
+  };
+
+  // ================= PROCEDURAL HTML5 CANVAS PORTRAIT ENGINE =================
+  function drawPortrait(eraNum, skinTone, genLabel) {
+    const canvas = document.getElementById('portrait-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Era-Specific Background Scenery
+    if (eraNum === 1) {
+      // 1754–1832: Dark oak ship planks & barred moonlight
+      ctx.fillStyle = "#16110d";
+      ctx.fillRect(0, 0, 170, 190);
+      ctx.strokeStyle = "#261c15";
+      ctx.lineWidth = 2;
+      for (let y = 20; y < 190; y += 28) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(170, y); ctx.stroke();
+      }
+      // Small barred grate light
+      ctx.fillStyle = "rgba(140, 170, 210, 0.14)";
+      ctx.fillRect(110, 18, 42, 34);
+      ctx.fillStyle = "#0b0907";
+      ctx.fillRect(123, 18, 4, 34);
+      ctx.fillRect(137, 18, 4, 34);
+    } else if (eraNum === 2) {
+      // 1876–1916: Southern sunset / farmland horizon
+      const grad = ctx.createLinearGradient(0, 0, 0, 190);
+      grad.addColorStop(0, "#3b231d");
+      grad.addColorStop(0.6, "#7a4928");
+      grad.addColorStop(1, "#1e2418");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 170, 190);
+    } else if (eraNum === 3) {
+      // 1921: Warm amber streetlamps / Greenwood brick skyline
+      ctx.fillStyle = "#1c1613";
+      ctx.fillRect(0, 0, 170, 190);
+      ctx.fillStyle = "#2e221b";
+      ctx.fillRect(10, 45, 45, 145);
+      ctx.fillRect(115, 35, 48, 155);
+      ctx.fillStyle = "#d4a359";
+      ctx.fillRect(22, 60, 8, 10);
+      ctx.fillRect(36, 60, 8, 10);
+      ctx.fillRect(126, 52, 8, 10);
+    } else if (eraNum === 4) {
+      // 1944: Olive drab / industrial steel
+      ctx.fillStyle = "#1a2018";
+      ctx.fillRect(0, 0, 170, 190);
+      ctx.strokeStyle = "#2b3327";
+      ctx.strokeRect(12, 12, 146, 166);
+    } else if (eraNum === 5) {
+      // 1957–1968: Warm sepia/gold protest & Chicago brick
+      ctx.fillStyle = "#211914";
+      ctx.fillRect(0, 0, 170, 190);
+      ctx.fillStyle = "rgba(212, 163, 89, 0.16)";
+      ctx.beginPath(); ctx.arc(85, 85, 65, 0, Math.PI * 2); ctx.fill();
+    } else {
+      // 1984–2000: Midnight urban skyline + red/blue police light glow
+      ctx.fillStyle = "#0c0e17";
+      ctx.fillRect(0, 0, 170, 190);
+      ctx.fillStyle = "rgba(201, 74, 74, 0.22)";
+      ctx.beginPath(); ctx.arc(30, 35, 45, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(58, 110, 196, 0.22)";
+      ctx.beginPath(); ctx.arc(140, 35, 45, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 2. Shoulders & Era Attire
+    ctx.fillStyle = eraNum === 1 ? "#594a3c" :
+                    eraNum === 2 ? "#3d352e" :
+                    eraNum === 3 ? "#2b2623" :
+                    eraNum === 4 ? "#3a4232" :
+                    eraNum === 5 ? "#1f1f24" : "#232733";
+    ctx.beginPath();
+    ctx.ellipse(85, 185, 58, 46, 0, Math.PI, 0);
+    ctx.fill();
+
+    // Collar detail for later eras
+    if (eraNum >= 3) {
+      ctx.fillStyle = "#e8e6e3";
+      ctx.beginPath();
+      ctx.moveTo(72, 142); ctx.lineTo(85, 162); ctx.lineTo(98, 142);
+      ctx.fill();
+    }
+
+    // 3. Neck & Head
+    ctx.fillStyle = skinTone;
+    ctx.fillRect(75, 118, 20, 28);
+    ctx.beginPath();
+    ctx.ellipse(85, 92, 26, 33, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. Hair / Era Styling
+    ctx.fillStyle = "#121010";
+    if (eraNum === 5) {
+      // 1960s Afro silhouette
+      ctx.beginPath();
+      ctx.arc(85, 76, 35, Math.PI * 0.85, Math.PI * 2.15);
+      ctx.fill();
+    } else if (eraNum === 6) {
+      // 1980s/90s styled hair / high fade
+      ctx.beginPath();
+      ctx.arc(85, 78, 30, Math.PI, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(85, 80, 27, Math.PI, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 5. Eyes & Determined Expression
+    ctx.fillStyle = "#14110f";
+    ctx.beginPath(); ctx.arc(75, 90, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(95, 90, 2.5, 0, Math.PI * 2); ctx.fill();
+
+    // Eyebrows
+    ctx.strokeStyle = "#14110f";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(69, 84); ctx.lineTo(80, 85); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(90, 85); ctx.lineTo(101, 84); ctx.stroke();
+
+    // Mouth
+    ctx.beginPath(); ctx.moveTo(78, 108); ctx.lineTo(92, 108); ctx.stroke();
+
+    document.getElementById('portrait-caption').innerHTML = `ERA ${eraNum} • ${state.year}<br>${genLabel}`;
+  }
+
+  // ================= WEB AUDIO SYNTHESIZER =================
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let oceanNode = null;
+
+  function playTone(freq, type, duration, vol = 0.08) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function startOceanAmbience() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    stopOceanAmbience();
+    const bufferSize = 2 * audioCtx.sampleRate;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99765 * b0 + white * 0.0990460;
+      b1 = 0.96300 * b1 + white * 0.2965164;
+      b2 = 0.57000 * b2 + white * 1.0526913;
+      output[i] = (b0 + b1 + b2 + white * 0.1848) * 0.04;
+    }
+    const whiteNoise = audioCtx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(340, audioCtx.currentTime);
+
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 2.5);
+
+    whiteNoise.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    whiteNoise.start();
+    oceanNode = { source: whiteNoise, gain: gain };
+  }
+
+  function stopOceanAmbience() {
+    if (oceanNode) {
+      try { oceanNode.source.stop(); } catch (e) {}
+      oceanNode = null;
+    }
+  }
+
+  // ================= EXPANDED 6-ERA STORY NODES =================
+  const nodes = {
+    // ERA I
+    start: {
+      eraNum: 1,
+      era: "ERA I: THE MIDDLE PASSAGE (1754)",
+      year: 1754,
+      loc: "Atlantic Ocean",
+      gen: () => `Gen 1: ${state.name}`,
+      title: "Chains in the Dark",
+      text: "You wake in the stifling hold of a slave ship bound for the Americas. Disease and starvation claim half the hull before land is sighted. How do you survive the crossing?",
+      choices: [
+        {
+          text: "Conserve strength, share rations quietly, and endure",
+          hint: "[Survival Check: Resilience]",
+          rngCheck: {
+            customCalc: (s) => Math.min(90, 58 + Math.floor(s.resilience * 0.35)),
+            failYear: "1754 • MIDDLE PASSAGE",
+            failTitle: "Lost at Sea",
+            failDesc: "Fever swept through the lower deck three weeks off the coast of West Africa. Your name was never recorded in any ledger."
+          },
+          effect: { resilience: -10, visibility: 5 },
+          feedback: "You survive the crossing and are sold at auction in Charleston, South Carolina.",
+          next: "era1_plantation"
+        },
+        {
+          text: "Coordinate a deck mutiny during a midnight squall",
+          hint: "[High Risk • +Leverage & +Resilience]",
+          rngCheck: {
+            customCalc: (s) => Math.min(75, 32 + Math.floor(s.leverage * 0.5)),
+            failYear: "1754 • SHIPBOARD REVOLT",
+            failTitle: "Executed on Deck",
+            failDesc: "The uprising was crushed with swivel guns. Your defiance became an unspoken legend, though your bloodline ended in the Atlantic."
+          },
+          effect: { resilience: 25, leverage: 25, visibility: 25 },
+          feedback: "Your fierce resistance forces the crew to negotiate before reaching port—earning you survival and unbroken spirit.",
+          next: "era1_plantation"
+        }
+      ]
+    },
+
+    era1_plantation: {
+      eraNum: 1,
+      era: "ERA I: CHATTEL SLAVERY (1788)",
+      year: 1788,
+      loc: "Lowcountry, South Carolina",
+      gen: () => `Gen 1: ${state.name}`,
+      title: "The Plantation Ledger",
+      text: "Decades of forced labor pass. You have a young child, Samuel. To keep him alive and prepare him for survival, which path do you take?",
+      choices: [
+        {
+          text: "Work the fields & build deep solidarity networks in the quarters",
+          hint: "[++Resilience, -Visibility]",
+          effect: { resilience: 20, visibility: -5 },
+          feedback: "You pass down survival songs, herbal knowledge, and unbreakable community bonds to Samuel.",
+          next: "era1_escape"
+        },
+        {
+          text: "Work inside the main house & secretly teach Samuel to read",
+          hint: "[++Leverage, ++Visibility]",
+          effect: { leverage: 25, visibility: 25, resilience: -5 },
+          feedback: "Overheard conversations and stolen primers give Samuel literacy—a dangerous weapon in the antebellum South.",
+          next: "era1_escape"
+        }
+      ]
+    },
+
+    era1_escape: {
+      eraNum: 1,
+      era: "GENERATIONAL HANDOFF → ANTEBELLUM (1832)",
+      year: 1832,
+      loc: "South Carolina",
+      gen: "Gen 2: Samuel",
+      title: "The North Star or the Long Wait",
+      text: "You are now Samuel. Slave patrols and anti-literacy laws tighten after Nat Turner's rebellion. Do you risk the Underground Railroad or endure until the Civil War?",
+      choices: [
+        {
+          text: "Flee North along the Underground Railroad",
+          hint: "[Survival Check: Leverage vs. Visibility]",
+          rngCheck: {
+            customCalc: (s) => Math.max(28, Math.min(88, 52 + s.leverage - Math.floor(s.visibility * 0.45))),
+            failYear: "1832 • FUGITIVE SLAVE PATROL",
+            failTitle: "Caught Near the River",
+            failDesc: "Bounty hunters tracked your scent across the border. Retaliation was swift and fatal."
+          },
+          effect: { leverage: 15, wealth: 10, visibility: 10 },
+          feedback: "You reach Philadelphia free, working as a blacksmith and saving coin before emancipation.",
+          next: "era2_reconstruction"
+        },
+        {
+          text: "Stay rooted, protect family, and survive until Emancipation",
+          hint: "[Low Risk, +Resilience]",
+          effect: { resilience: 15, visibility: -10 },
+          feedback: "You endure the whip and the war, emerging in 1865 alive with your family intact.",
+          next: "era2_reconstruction"
+        }
+      ]
+    },
+
+    // ERA II
+    era2_reconstruction: {
+      eraNum: 2,
+      era: "ERA II: RECONSTRUCTION & THE NADIR (1876)",
+      year: 1876,
+      loc: "Southern Midlands",
+      gen: "Gen 3: Clara",
+      title: "Forty Acres Denied",
+      text: "You are Samuel's daughter, Clara. Federal troops pull out of the South, and Jim Crow laws snap shut. How do you establish your family's economic footing?",
+      choices: [
+        {
+          text: "Buy a parcel of farmland and open a cooperative store",
+          hint: "[++Wealth, ++Leverage, +++Visibility]",
+          effect: { wealth: 30, leverage: 15, visibility: 30 },
+          feedback: "Your family becomes prosperous independent landowners—drawing immediate resentment from local night riders.",
+          next: "era2_freedmens_bank"
+        },
+        {
+          text: "Sign a sharecropping contract to stay out of sight",
+          hint: "[Locks Wealth Low, -Visibility]",
+          effect: { wealth: 5, visibility: -15, resilience: -5 },
+          feedback: "Rigged ledger books keep you permanently in debt, though your low profile spares you from Klan raids.",
+          next: "era2_freedmens_bank"
+        }
+      ]
+    },
+
+    era2_freedmens_bank: {
+      eraNum: 2,
+      era: "ERA II: INSTITUTIONAL COLLAPSE (1884)",
+      year: 1884,
+      loc: "Southern Midlands",
+      gen: "Gen 3: Clara",
+      title: "The Freedman's Bank Failure",
+      text: "You deposited your family's hard-earned savings into the federally chartered Freedman's Savings Bank—only for white trustees to mismanage and collapse the institution, wiping out millions in Black deposits without bailouts.",
+      choices: [
+        {
+          text: "Pool remaining coins into a local church mutual aid society",
+          hint: "[+Resilience, +Leverage, -Wealth]",
+          effect: { resilience: 15, leverage: 10, wealth: -10 },
+          feedback: "You lose half your cash reserves, but build tight-knit community credit networks.",
+          next: "era2_migration"
+        },
+        {
+          text: "Take extra domestic & rail labor shifts to recover the loss",
+          hint: "[+Wealth, -Resilience]",
+          effect: { wealth: 10, resilience: -10 },
+          feedback: "You claw back a modest emergency fund through grueling physical labor.",
+          next: "era2_migration"
+        }
+      ]
+    },
+
+    era2_migration: {
+      eraNum: 2,
+      era: "ERA II: THE GREAT MIGRATION (1916)",
+      year: 1916,
+      loc: "South → North/West",
+      gen: "Gen 3: Clara",
+      title: "Train Tickets & Mob Threats",
+      text: "Lynching terror sweeps the region while northern factories and western Black towns advertise opportunity. Where do you relocate your family for the 1920s?",
+      choices: [
+        {
+          text: "Move to Greenwood (Tulsa, OK) to build on Black Wall Street",
+          hint: "[+++Wealth Potential, Extreme 1921 Risk]",
+          effect: { wealth: 30, visibility: 25 },
+          setCity: "Tulsa",
+          feedback: "You arrive in Tulsa's booming Greenwood District, pouring every dollar into a thriving family enterprise.",
+          next: "era3_1920s"
+        },
+        {
+          text: "Take the Illinois Central train to Chicago's South Side",
+          hint: "[+Leverage, Moderate Wealth, Industrial Jobs]",
+          effect: { wealth: 15, leverage: 15, visibility: 10 },
+          setCity: "Chicago",
+          feedback: "You settle into Bronzeville, taking steady industrial work and building urban roots.",
+          next: "era3_1920s"
+        }
+      ]
+    },
+
+    // ERA III
+    era3_1920s: {
+      eraNum: 3,
+      era: "ERA III: THE ROARING TWENTIES (1921)",
+      year: 1921,
+      loc: () => state.cityChoice === "Tulsa" ? "Greenwood, Tulsa" : "Bronzeville, Chicago",
+      gen: "Gen 4: Arthur",
+      title: "The Boom & The Backlash",
+      text: () => state.cityChoice === "Tulsa"
+        ? "You are Clara's son, Arthur. Your Greenwood hotel and print shop are clearing a fortune—until May 31, 1921, when an armed white mob deputized by city officials invades the district with torches and planes."
+        : "You are Clara's son, Arthur. Your neighborhood barbershop and real estate office are thriving—until racial tensions boil over into street riots and corrupt police shakedowns.",
+      choices: [
+        {
+          text: "Defend your business and family with armed WWI veterans",
+          hint: "[Systemic City Check: Survival Roll]",
+          rngCheck: {
+            customCalc: (s) => s.cityChoice === "Tulsa" ? 48 + Math.floor(s.resilience * 0.3) : 70 + Math.floor(s.resilience * 0.2),
+            failYear: () => state.cityChoice === "Tulsa" ? "1921 • TULSA RACE MASSACRE" : "1921 • CHICAGO RIOTS",
+            failTitle: "Burned Out & Massacred",
+            failDesc: "Overwhelmed by armed mobs and state militia, your block was reduced to ash. Insurance claims were denied as 'riot exclusions.' Your bloodline perished in the flames."
+          },
+          effect: { resilience: 20, visibility: 10 },
+          resetWealth: true,
+          feedback: "You escape with your life, but your entire business and generational wealth are burned to zero. You relocate to Chicago to start over.",
+          next: "era4_ww2"
+        },
+        {
+          text: "Abandon the property immediately and evacuate your family",
+          hint: "[Survive, Wealth Resets to 5]",
+          resetWealth: true,
+          effect: { wealth: 5, resilience: -10, visibility: -10 },
+          feedback: "You flee with only the clothes on your back. Everything your parents built is looted or burned, resetting your family wealth to near zero.",
+          next: "era4_ww2"
+        }
+      ]
+    },
+
+    // ERA IV
+    era4_ww2: {
+      eraNum: 4,
+      era: "ERA IV: WORLD WAR II & REDLINING (1944–1948)",
+      year: 1944,
+      loc: "European Theater / Chicago",
+      gen: "Gen 4: Arthur",
+      title: "Double V & The GI Bill",
+      text: "World War II erupts. You are drafted into a segregated battalion to fight fascism abroad while fighting Jim Crow at home.",
+      choices: [
+        {
+          text: "Serve on the front lines & apply for a 1948 GI Bill home loan",
+          hint: "[Combat + Friendly-Fire RNG • Systemic Redlining]",
+          rngCheck: {
+            customCalc: (s) => 68 + Math.floor(s.resilience * 0.25),
+            failYear: "1944 • SEGREGATED BATTALION",
+            failTitle: "Killed in Action / Friendly Fire",
+            failDesc: "Sent into an unescorted advance with substandard gear, you never made it home to claim the democracy you fought for."
+          },
+          effect: { resilience: 15, leverage: 15, wealth: 5 },
+          feedback: "You survive the war—only for banks in 1948 to deny your GI Bill suburban mortgage due to federal redlining maps. You are locked out of post-war suburban equity.",
+          next: "era5_start"
+        },
+        {
+          text: "Work stateside munitions & Pullman rail logistics",
+          hint: "[Safe, +Wealth, +Union Leverage]",
+          effect: { wealth: 15, leverage: 15, resilience: 5 },
+          feedback: "You avoid overseas combat and build steady savings, though redlining still traps your family in underfunded city blocks.",
+          next: "era5_start"
+        }
+      ]
+    },
+
+    // ERA V
+    era5_start: {
+      eraNum: 5,
+      era: "ERA V: CIVIL RIGHTS & BLACK POWER (1957)",
+      year: 1957,
+      loc: "South Side, Chicago",
+      gen: "Gen 5: Raymond",
+      title: "The Redlined Inheritance",
+      text: "You are Arthur's son, Raymond. Carrying your family's exact accumulated Wealth and Leverage from the past four generations, you step into the fire of the Civil Rights Movement. How do you position your family?",
+      choices: [
+        {
+          text: "Join SNCC / Nonviolent Direct Action & voter drives",
+          hint: "[+Leverage, ++Visibility, -Wealth]",
+          effect: { leverage: 25, visibility: 30, wealth: -5, resilience: 10 },
+          feedback: "You endure arrests and beatings, building deep legal networks and political literacy—putting your name on an FBI watchlist.",
+          next: "era5_cointelpro"
+        },
+        {
+          text: "Organize neighborhood self-defense & free breakfast programs",
+          hint: "[++Resilience, +++Visibility]",
+          effect: { resilience: 30, visibility: 45, leverage: 10 },
+          feedback: "Your block stays fed and protected from predatory policing, but local law enforcement marks you as a high-priority target.",
+          next: "era5_cointelpro"
+        },
+        {
+          text: "Keep your head down, work double shifts, and save quietly",
+          hint: "[++Wealth, -Visibility, -Resilience]",
+          effect: { wealth: 25, visibility: -15, resilience: -15 },
+          feedback: "You avoid the batons and watchlists, stacking cash in a local credit union while carrying the quiet weight of isolation.",
+          next: "era5_cointelpro"
+        }
+      ]
+    },
+
+    era5_cointelpro: {
+      eraNum: 5,
+      era: "ERA V: COINTELPRO & THE 1968 UPRISINGS",
+      year: 1968,
+      loc: "Chicago, IL",
+      gen: "Gen 5: Raymond",
+      title: "April 1968: Smoke on the Avenue",
+      text: "Dr. King has been assassinated. The city erupts. National Guard troops roll down the boulevard with fixed bayonets, and FBI COINTELPRO raids are sweeping through activist homes.",
+      choices: [
+        {
+          text: "Stand guard outside Black-owned storefronts on your block",
+          hint: "[Systemic Survival Check: Visibility]",
+          rngCheck: {
+            stat: "visibility",
+            invert: true,
+            baseChance: 80,
+            failYear: "1968 • CHICAGO UPRISING",
+            failTitle: "Caught in the Crossfire",
+            failDesc: "Your high visibility made you a known face to local police. During the curfew sweep, an officer claimed you reached for a weapon. Four generations of survival end on the pavement."
+          },
+          effect: { resilience: 15, leverage: 10 },
+          feedback: "You hold the line through the night. The neighborhood remembers your courage, and you survive to raise your daughter.",
+          next: "era6_handoff"
+        },
+        {
+          text: "Board up the windows and shelter your family indoors",
+          hint: "[Safe, -Resilience]",
+          effect: { resilience: -10, visibility: -10 },
+          feedback: "You survive the week unscathed, watching the neighborhood corridors burn on a black-and-white television.",
+          next: "era6_handoff"
+        }
+      ]
+    },
+
+    // ERA VI
+    era6_handoff: {
+      eraNum: 6,
+      era: "GENERATIONAL HANDOFF → ERA VI (1984)",
+      year: 1984,
+      loc: "Chicago, IL",
+      gen: "Gen 6: Simone",
+      title: "The Deindustrialization Trap",
+      text: "Twenty years pass. You are now Raymond's daughter, Simone. The steel mills have closed, jobs have vanished overseas, and crack cocaine has flooded the redlined blocks. Your ancestors' cumulative choices dictate what doors are open to you.",
+      choices: [
+        {
+          text: "Use ancestral Leverage & savings to enter corporate finance",
+          hint: "[Requires Leverage ≥ 45 OR Wealth ≥ 45]",
+          req: (s) => s.leverage >= 45 || s.wealth >= 45,
+          effect: { wealth: 45, leverage: 20, visibility: 15 },
+          feedback: "Generations of hard-won networks and savings open doors. You break into the corporate sector, building real capital for the first time since 1754.",
+          next: "era6_1995"
+        },
+        {
+          text: "Work two minimum-wage service jobs to keep the lights on",
+          hint: "[Steady, Low Wealth]",
+          effect: { wealth: 10, resilience: 10, visibility: -5 },
+          feedback: "You stay clean and out of the system's crosshairs, though inflation eats nearly every paycheck.",
+          next: "era6_1995"
+        },
+        {
+          text: "Move product on the corner—gangs protect you from hostile cops",
+          hint: "[++Wealth, +++Visibility, High Risk]",
+          effect: { wealth: 40, visibility: 40, resilience: -10 },
+          feedback: "Fast money keeps your family fed when legal jobs don't exist, though every siren raises your heart rate.",
+          next: "era6_1995"
+        }
+      ]
+    },
+
+    era6_1995: {
+      eraNum: 6,
+      era: "ERA VI: THE FINAL GAUNTLET (1995)",
+      year: 1995,
+      loc: "Interstate 94",
+      gen: "Gen 6: Simone",
+      title: "Red and Blue Lights",
+      text: "You are five years away from the Year 2000. You're driving home late at night when red-and-blue lights flash in your rearview mirror for a 'broken taillight.' Regardless of your bank account or clean record, the final systemic check begins.",
+      choices: [
+        {
+          text: "Keep hands on the wheel, state your rights calmly, and comply",
+          hint: "[Final Survival Roll: Modified by Leverage & Visibility]",
+          rngCheck: {
+            customCalc: (s) => {
+              let chance = 56 + Math.floor(s.leverage * 0.4) - Math.floor(s.visibility * 0.35);
+              return Math.max(18, Math.min(88, chance));
+            },
+            failYear: "1995 • INTERSTATE 94",
+            failTitle: "Killed During a Routine Traffic Stop",
+            failDesc: "Despite doing everything right, the officer claimed he 'feared for his life' when you reached for your registration. No charges were filed. Two hundred and forty-one years of generational survival are erased in seconds."
+          },
+          effect: { wealth: 25 },
+          feedback: "The officer writes a warning and lets you go. Your hands shake on the steering wheel as you drive into the night.",
+          next: "win_2000"
+        }
+      ]
+    },
+
+    win_2000: {
+      eraNum: 6,
+      era: "ENDGAME • JANUARY 1, 2000",
+      year: 2000,
+      loc: "Chicago, IL",
+      gen: "Gen 6: Simone & Gen 7",
+      title: "You Made It to the Millennium",
+      text: () => `Against 246 years of stacked odds—the Middle Passage, chattel slavery, Tulsa, redlining, COINTELPRO, and the War on Drugs—your bloodline survived intact into the Year 2000 with a final Wealth score of ${state.wealth} and Leverage score of ${state.leverage}. (+2 Ancestral Memory Awarded!)`,
+      onEnter: () => { meta.memoryPoints += 2; updateUI(); },
+      choices: [
+        {
+          text: "Start Another Bloodline in 1754 (Spend Memory & Test New Path)",
+          hint: "[New Run]",
+          restart: true
+        }
+      ]
+    }
+  };
+
+  function updateUI() {
+    document.getElementById('ui-year').textContent = state.year;
+    document.getElementById('ui-loc').textContent = state.location;
+    document.getElementById('ui-gen').textContent = state.gen;
+    document.getElementById('stat-wealth').textContent = state.wealth;
+    document.getElementById('stat-vis').textContent = state.visibility;
+    document.getElementById('stat-res').textContent = state.resilience;
+    document.getElementById('stat-lev').textContent = state.leverage;
+    document.getElementById('ui-mem').textContent = meta.memoryPoints;
+    document.getElementById('ui-arch').textContent = state.archive.length;
+    document.getElementById('shop-mem-points').textContent = meta.memoryPoints;
+    document.getElementById('death-mem-count').textContent = meta.memoryPoints;
+  }
+
+  function renderNode(nodeKey, lastFeedback = null) {
+    const node = nodes[nodeKey];
+    state.year = node.year;
+    state.eraNum = node.eraNum;
+    state.location = typeof node.loc === 'function' ? node.loc() : node.loc;
+    state.gen = typeof node.gen === 'function' ? node.gen() : node.gen;
+
+    if (node.onEnter) node.onEnter();
+    updateUI();
+    drawPortrait(state.eraNum, state.skin, state.gen);
+
+    document.getElementById('era-badge').textContent = node.era;
+    document.getElementById('scene-title').textContent = node.title;
+    document.getElementById('scene-text').textContent = typeof node.text === 'function' ? node.text() : node.text;
+
+    const fbBox = document.getElementById('feedback-box');
+    if (lastFeedback) {
+      fbBox.style.display = 'block';
+      fbBox.textContent = lastFeedback;
+    } else {
+      fbBox.style.display = 'none';
+    }
+
+    const choicesDiv = document.getElementById('choices');
+    choicesDiv.innerHTML = '';
+
+    node.choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+
+      const locked = choice.req && !choice.req(state);
+      if (locked) {
+        btn.disabled = true;
+        btn.style.opacity = '0.42';
+        btn.style.cursor = 'not-allowed';
+      }
+
+      btn.innerHTML = `
+        <span class="choice-text">${choice.text}</span>
+        <span class="choice-hint">${locked ? '[LOCKED: ' + choice.hint + ']' : choice.hint}</span>
+      `;
+
+      if (!locked) {
+        btn.onclick = () => handleChoice(choice);
+      }
+      choicesDiv.appendChild(btn);
+    });
+  }
+
+  function handleChoice(choice) {
+    playTone(320, 'triangle', 0.14);
+    if (choice.restart) {
+      restartRun();
+      return;
+    }
+
+    if (choice.setCity) {
+      state.cityChoice = choice.setCity;
+    }
+
+    if (choice.rngCheck) {
+      runRngCheck(choice);
+    } else {
+      if (choice.resetWealth) state.wealth = 0;
+      applyEffects(choice.effect);
+      renderNode(choice.next, choice.feedback);
+    }
+  }
+
+  function applyEffects(eff) {
+    if (!eff) return;
+    if (eff.wealth !== undefined) state.wealth = Math.max(0, state.wealth + eff.wealth);
+    if (eff.visibility !== undefined) state.visibility = Math.max(0, Math.min(100, state.visibility + eff.visibility));
+    if (eff.resilience !== undefined) state.resilience = Math.max(0, Math.min(100, state.resilience + eff.resilience));
+    if (eff.leverage !== undefined) state.leverage = Math.max(0, Math.min(100, state.leverage + eff.leverage));
+    updateUI();
+  }
+
+  function runRngCheck(choice) {
+    const overlay = document.getElementById('rng-overlay');
+    const numEl = document.getElementById('rng-number');
+    const descEl = document.getElementById('rng-desc');
+
+    let survivalChance = 70;
+    if (choice.rngCheck.customCalc) {
+      survivalChance = choice.rngCheck.customCalc(state);
+    } else if (choice.rngCheck.invert) {
+      survivalChance = Math.max(20, choice.rngCheck.baseChance - Math.floor(state[choice.rngCheck.stat] * 0.5));
+    }
+
+    overlay.style.display = 'flex';
+    descEl.textContent = `Survival Threshold: Roll ≤ ${survivalChance}% (Weighted by your bloodline's stats)`;
+
+    let ticks = 0;
+    const interval = setInterval(() => {
+      numEl.textContent = Math.floor(Math.random() * 100) + 1;
+      numEl.style.color = '#d4a359';
+      playTone(180 + ticks * 22, 'sine', 0.05, 0.04);
+      ticks++;
+
+      if (ticks > 15) {
+        clearInterval(interval);
+        const roll = Math.floor(Math.random() * 100) + 1;
+        numEl.textContent = roll;
+
+        if (roll <= survivalChance) {
+          numEl.style.color = '#529e66';
+          descEl.textContent = `ROLLED ${roll} (Needed ≤ ${survivalChance}) — SURVIVED`;
+          playTone(520, 'triangle', 0.3);
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            if (choice.resetWealth) state.wealth = 0;
+            applyEffects(choice.effect);
+            renderNode(choice.next, choice.feedback);
+          }, 1400);
+        } else {
+          numEl.style.color = '#c94a4a';
+          descEl.textContent = `ROLLED ${roll} (Needed ≤ ${survivalChance}) — BLOODLINE SEVERED`;
+          playTone(95, 'sawtooth', 0.7, 0.14);
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            triggerPermadeath(choice.rngCheck);
+          }, 1400);
+        }
+      }
+    }, 70);
+  }
+
+  function triggerPermadeath(checkData) {
+    const fYear = typeof checkData.failYear === 'function' ? checkData.failYear() : checkData.failYear;
+    meta.memoryPoints += 1;
+    state.archive.push({
+      gen: state.gen,
+      year: fYear,
+      title: checkData.failTitle,
+      desc: checkData.failDesc
+    });
+    updateUI();
+    renderArchiveList();
+    renderMemoryShop();
+
+    document.getElementById('death-year').textContent = `${fYear} • BLOODLINE TERMINATED`;
+    document.getElementById('death-headline').textContent = checkData.failTitle;
+    document.getElementById('death-sub').textContent = checkData.failDesc;
+    document.getElementById('death-screen').style.display = 'flex';
+    startOceanAmbience();
+  }
+
+  function renderArchiveList() {
+    const list = document.getElementById('archive-list');
+    if (state.archive.length === 0) return;
+    list.innerHTML = state.archive.map((item, idx) => `
+      <div class="archive-entry">
+        <strong>Run #${idx + 1} — ${item.gen}</strong> • <span style="color:var(--danger)">${item.year}</span><br>
+        <em>${item.title}:</em> ${item.desc}
+      </div>
+    `).reverse().join('');
+  }
+
+  function renderMemoryShop() {
+    const list = document.getElementById('perks-list');
+    list.innerHTML = perksCatalog.map(perk => {
+      const owned = meta.unlockedPerks.includes(perk.id);
+      const canAfford = meta.memoryPoints >= perk.cost;
+      return `
+        <div class="perk-card">
+          <div>
+            <strong style="color:#fff">${perk.title}</strong>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent); margin-left:8px;">[${perk.cost} Memory]</span>
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:4px;">${perk.desc}</p>
+          </div>
+          <button class="footer-btn" ${owned || !canAfford ? 'disabled' : ''} onclick="buyPerk('${perk.id}')"
+            style="${owned ? 'border-color:var(--success); color:var(--success);' : !canAfford ? 'opacity:0.4; cursor:not-allowed;' : ''}">
+            ${owned ? 'UNLOCKED' : 'Unlock'}
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function buyPerk(perkId) {
+    const perk = perksCatalog.find(p => p.id === perkId);
+    if (!perk || meta.unlockedPerks.includes(perkId) || meta.memoryPoints < perk.cost) return;
+    meta.memoryPoints -= perk.cost;
+    meta.unlockedPerks.push(perkId);
+    playTone(580, 'triangle', 0.25);
+    updateUI();
+    renderMemoryShop();
+  }
+
+  function toggleModal(id) {
+    const modal = document.getElementById(id);
+    if (id === 'memory-modal') renderMemoryShop();
+    modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  function openMemoryShopFromDeath() {
+    renderMemoryShop();
+    document.getElementById('memory-modal').style.display = 'flex';
+  }
+
+  function restartRun() {
+    stopOceanAmbience();
+    document.getElementById('death-screen').style.display = 'none';
+    const origin = gen1Origins[Math.floor(Math.random() * gen1Origins.length)];
+    state.name = origin.name;
+    state.skin = origin.skin;
+    state.wealth = 0;
+    state.visibility = 10;
+    state.resilience = origin.res;
+    state.leverage = origin.lev;
+    state.cityChoice = "Tulsa";
+
+    // Apply permanent Ancestral Memory unlocks
+    meta.unlockedPerks.forEach(pid => {
+      const perk = perksCatalog.find(p => p.id === pid);
+      if (perk) perk.apply(state);
+    });
+
+    const perkNote = meta.unlockedPerks.length > 0
+      ? ` (${meta.unlockedPerks.length} Ancestral Memory trait(s) active)`
+      : "";
+    renderNode('start', `New Bloodline Initialized: You begin in 1754 as ${origin.name}${perkNote}.`);
+  }
+
+  // Boot game
+  renderMemoryShop();
+  renderNode('start');
+</script>
+</body>
+</html>
+"""
+
+with open("bloodline_deluxe_edition.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("Generated bloodline_deluxe_edition.html successfully.")
