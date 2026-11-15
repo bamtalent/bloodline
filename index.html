@@ -3,7 +3,7 @@ html_content = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BLOODLINE: 1754–2000 Deluxe Edition</title>
+<title>BLOODLINE: 1754–2000 | Created by Darius Colquitt</title>
 <style>
   :root {
     --bg: #09090b;
@@ -27,6 +27,7 @@ html_content = """<!DOCTYPE html>
     color: var(--text);
     font-family: var(--font-sans);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -42,6 +43,108 @@ html_content = """<!DOCTYPE html>
     overflow: hidden;
     box-shadow: 0 28px 70px rgba(0,0,0,0.9);
     position: relative;
+  }
+
+  /* ================= START TITLE SCREEN ================= */
+  #title-screen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, #1b1815 0%, #09090b 100%);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    padding: 44px 32px 24px;
+  }
+
+  .title-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .main-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    letter-spacing: 4px;
+    color: #fff;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 24px rgba(212, 163, 89, 0.25);
+  }
+
+  .title-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+  }
+
+  .title-pitch {
+    max-width: 540px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: #d6d3cd;
+    margin-bottom: 28px;
+  }
+
+  .title-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .primary-start-btn {
+    background: var(--accent);
+    color: #0b0b0d;
+    border: none;
+    padding: 14px 32px;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .primary-start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 163, 89, 0.35);
+  }
+
+  .secondary-title-btn {
+    background: var(--panel-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 14px 20px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .secondary-title-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .title-credits {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--muted);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 14px;
+    width: 100%;
   }
 
   /* Top Ledger */
@@ -246,7 +349,7 @@ html_content = """<!DOCTYPE html>
     line-height: 1.6;
   }
 
-  /* Modal (Archive & Ancestral Memory Shop) */
+  /* Modal (Archive, Memory Shop, Credits) */
   .modal-overlay {
     display: none;
     position: absolute;
@@ -255,7 +358,7 @@ html_content = """<!DOCTYPE html>
     padding: 28px;
     flex-direction: column;
     justify-content: space-between;
-    z-index: 30;
+    z-index: 50;
   }
 
   .modal-header {
@@ -301,7 +404,7 @@ html_content = """<!DOCTYPE html>
     border-top: 1px solid var(--border);
     padding: 12px 24px;
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--muted);
     display: flex;
     flex-wrap: wrap;
@@ -317,16 +420,65 @@ html_content = """<!DOCTYPE html>
     padding: 5px 10px;
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     cursor: pointer;
     transition: all 0.15s;
   }
   .footer-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* External Creator Credits Footer */
+  #creator-credits-footer {
+    width: 100%;
+    max-width: 820px;
+    margin-top: 14px;
+    padding: 0 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--muted);
+  }
+
+  #creator-credits-footer strong {
+    color: var(--text);
+  }
+
+  .credits-link {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+    border-bottom: 1px dotted var(--accent);
+  }
+  .credits-link:hover { color: #fff; }
 </style>
 </head>
 <body>
 
 <div id="game-container">
+  <!-- ================= START TITLE SCREEN ================= -->
+  <div id="title-screen">
+    <div></div>
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <div class="title-eyebrow">A Generational Historical Roguelite</div>
+      <h1 class="main-title">BLOODLINE</h1>
+      <div class="title-subtitle">1754 • THE MIDDLE PASSAGE → 2000 • THE MILLENNIUM</div>
+      <p class="title-pitch">
+        Guide a single African American family across six historical eras and 246 years of compounding systemic odds. Every choice shapes the wealth, visibility, and survival of your descendants—and a single fatal encounter resets the entire bloodline back to the ship in 1754.
+      </p>
+      <div class="title-actions">
+        <button class="primary-start-btn" onclick="startGameFromTitle()">Begin Bloodline (1754)</button>
+        <button class="secondary-title-btn" onclick="toggleModal('memory-modal')">✨ Ancestral Memory (<span id="title-mem">0</span>)</button>
+        <button class="secondary-title-btn" onclick="toggleModal('credits-modal')">About & Credits</button>
+      </div>
+    </div>
+    <div class="title-credits">
+      Created & Designed by <strong>Darius Colquitt</strong> • Interactive Fiction & Web Game Prototype
+    </div>
+  </div>
+
   <!-- Top Ledger -->
   <div id="ledger">
     <div class="meta-info">
@@ -381,6 +533,9 @@ html_content = """<!DOCTYPE html>
       <button class="choice-btn" onclick="restartRun()" style="justify-content:center;">
         <span class="choice-text">Board the Ship Again (Gen 1)</span>
       </button>
+      <button class="choice-btn" onclick="returnToTitle()" style="justify-content:center;">
+        <span class="choice-text">Title Screen</span>
+      </button>
     </div>
   </div>
 
@@ -417,15 +572,45 @@ html_content = """<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- Footer Bar -->
+  <!-- Creator Credits & Historical Note Modal -->
+  <div id="credits-modal" class="modal-overlay">
+    <div>
+      <div class="modal-header">
+        <h2>Credits & Historical Design Note</h2>
+        <button class="footer-btn" onclick="toggleModal('credits-modal')">Close</button>
+      </div>
+      <div class="scroll-list" style="font-size: 0.92rem; line-height: 1.65; color: #d6d3cd;">
+        <p><strong style="color:#fff;">Concept, Narrative Architecture & Development:</strong><br>
+        Darius Colquitt • BAM Talent / Darius Colquitt &amp; Company</p>
+        <p><strong style="color:#fff;">Engine & Audio:</strong><br>
+        Custom HTML5 Canvas Procedural Portrait Engine &amp; Web Audio API Synthesizer (Zero external dependencies).</p>
+        <p><strong style="color:#fff;">About the Game:</strong><br>
+        <em>BLOODLINE</em> uses roguelite permadeath and weighted probability mechanics as an interactive lens into how systemic barriers—from the transatlantic slave trade and the 1884 Freedman's Bank collapse to the 1921 Tulsa Race Massacre, federal redlining, COINTELPRO, and the War on Drugs—compound across generations.</p>
+      </div>
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--muted); margin-top: 12px;">
+      BLOODLINE (1754–2000) • Standalone Web Edition
+    </div>
+  </div>
+
+  <!-- In-Game Footer Bar -->
   <div id="footer-bar">
-    <span>DELUXE EDITION: 1754 → 2000</span>
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button class="footer-btn" onclick="returnToTitle()">⌂ Title</button>
+      <span>1754 → 2000 (6 ERAS)</span>
+    </div>
+    <div style="display:flex; gap:8px;">
       <button class="footer-btn" onclick="toggleModal('memory-modal')">✨ Memory (<span id="ui-mem">0</span>)</button>
       <button class="footer-btn" onclick="toggleModal('archive-modal')">📜 Archive (<span id="ui-arch">0</span>)</button>
     </div>
   </div>
 </div>
+
+<!-- Persistent Creator Credits Footer -->
+<footer id="creator-credits-footer">
+  <span><strong>BLOODLINE</strong> • Game Design &amp; Code by <strong>Darius Colquitt</strong></span>
+  <span><a class="credits-link" onclick="toggleModal('credits-modal')">Credits &amp; Historical Note</a> • v1.0</span>
+</footer>
 
 <script>
   const gen1Origins = [
@@ -479,15 +664,27 @@ html_content = """<!DOCTYPE html>
     archive: []
   };
 
+  // ================= TITLE SCREEN NAVIGATION =================
+  function startGameFromTitle() {
+    playTone(440, 'triangle', 0.22);
+    document.getElementById('title-screen').style.display = 'none';
+    restartRun();
+  }
+
+  function returnToTitle() {
+    stopOceanAmbience();
+    document.getElementById('death-screen').style.display = 'none';
+    document.getElementById('title-screen').style.display = 'flex';
+    updateUI();
+  }
+
   // ================= PROCEDURAL HTML5 CANVAS PORTRAIT ENGINE =================
   function drawPortrait(eraNum, skinTone, genLabel) {
     const canvas = document.getElementById('portrait-canvas');
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Era-Specific Background Scenery
     if (eraNum === 1) {
-      // 1754–1832: Dark oak ship planks & barred moonlight
       ctx.fillStyle = "#16110d";
       ctx.fillRect(0, 0, 170, 190);
       ctx.strokeStyle = "#261c15";
@@ -495,14 +692,12 @@ html_content = """<!DOCTYPE html>
       for (let y = 20; y < 190; y += 28) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(170, y); ctx.stroke();
       }
-      // Small barred grate light
       ctx.fillStyle = "rgba(140, 170, 210, 0.14)";
       ctx.fillRect(110, 18, 42, 34);
       ctx.fillStyle = "#0b0907";
       ctx.fillRect(123, 18, 4, 34);
       ctx.fillRect(137, 18, 4, 34);
     } else if (eraNum === 2) {
-      // 1876–1916: Southern sunset / farmland horizon
       const grad = ctx.createLinearGradient(0, 0, 0, 190);
       grad.addColorStop(0, "#3b231d");
       grad.addColorStop(0.6, "#7a4928");
@@ -510,7 +705,6 @@ html_content = """<!DOCTYPE html>
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 170, 190);
     } else if (eraNum === 3) {
-      // 1921: Warm amber streetlamps / Greenwood brick skyline
       ctx.fillStyle = "#1c1613";
       ctx.fillRect(0, 0, 170, 190);
       ctx.fillStyle = "#2e221b";
@@ -521,19 +715,16 @@ html_content = """<!DOCTYPE html>
       ctx.fillRect(36, 60, 8, 10);
       ctx.fillRect(126, 52, 8, 10);
     } else if (eraNum === 4) {
-      // 1944: Olive drab / industrial steel
       ctx.fillStyle = "#1a2018";
       ctx.fillRect(0, 0, 170, 190);
       ctx.strokeStyle = "#2b3327";
       ctx.strokeRect(12, 12, 146, 166);
     } else if (eraNum === 5) {
-      // 1957–1968: Warm sepia/gold protest & Chicago brick
       ctx.fillStyle = "#211914";
       ctx.fillRect(0, 0, 170, 190);
       ctx.fillStyle = "rgba(212, 163, 89, 0.16)";
       ctx.beginPath(); ctx.arc(85, 85, 65, 0, Math.PI * 2); ctx.fill();
     } else {
-      // 1984–2000: Midnight urban skyline + red/blue police light glow
       ctx.fillStyle = "#0c0e17";
       ctx.fillRect(0, 0, 170, 190);
       ctx.fillStyle = "rgba(201, 74, 74, 0.22)";
@@ -542,7 +733,6 @@ html_content = """<!DOCTYPE html>
       ctx.beginPath(); ctx.arc(140, 35, 45, 0, Math.PI * 2); ctx.fill();
     }
 
-    // 2. Shoulders & Era Attire
     ctx.fillStyle = eraNum === 1 ? "#594a3c" :
                     eraNum === 2 ? "#3d352e" :
                     eraNum === 3 ? "#2b2623" :
@@ -552,7 +742,6 @@ html_content = """<!DOCTYPE html>
     ctx.ellipse(85, 185, 58, 46, 0, Math.PI, 0);
     ctx.fill();
 
-    // Collar detail for later eras
     if (eraNum >= 3) {
       ctx.fillStyle = "#e8e6e3";
       ctx.beginPath();
@@ -560,22 +749,18 @@ html_content = """<!DOCTYPE html>
       ctx.fill();
     }
 
-    // 3. Neck & Head
     ctx.fillStyle = skinTone;
     ctx.fillRect(75, 118, 20, 28);
     ctx.beginPath();
     ctx.ellipse(85, 92, 26, 33, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 4. Hair / Era Styling
     ctx.fillStyle = "#121010";
     if (eraNum === 5) {
-      // 1960s Afro silhouette
       ctx.beginPath();
       ctx.arc(85, 76, 35, Math.PI * 0.85, Math.PI * 2.15);
       ctx.fill();
     } else if (eraNum === 6) {
-      // 1980s/90s styled hair / high fade
       ctx.beginPath();
       ctx.arc(85, 78, 30, Math.PI, Math.PI * 2);
       ctx.fill();
@@ -585,18 +770,14 @@ html_content = """<!DOCTYPE html>
       ctx.fill();
     }
 
-    // 5. Eyes & Determined Expression
     ctx.fillStyle = "#14110f";
     ctx.beginPath(); ctx.arc(75, 90, 2.5, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(95, 90, 2.5, 0, Math.PI * 2); ctx.fill();
 
-    // Eyebrows
     ctx.strokeStyle = "#14110f";
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(69, 84); ctx.lineTo(80, 85); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(90, 85); ctx.lineTo(101, 84); ctx.stroke();
-
-    // Mouth
     ctx.beginPath(); ctx.moveTo(78, 108); ctx.lineTo(92, 108); ctx.stroke();
 
     document.getElementById('portrait-caption').innerHTML = `ERA ${eraNum} • ${state.year}<br>${genLabel}`;
@@ -660,9 +841,8 @@ html_content = """<!DOCTYPE html>
     }
   }
 
-  // ================= EXPANDED 6-ERA STORY NODES =================
+  // ================= 6-ERA STORY NODES =================
   const nodes = {
-    // ERA I
     start: {
       eraNum: 1,
       era: "ERA I: THE MIDDLE PASSAGE (1754)",
@@ -759,7 +939,6 @@ html_content = """<!DOCTYPE html>
       ]
     },
 
-    // ERA II
     era2_reconstruction: {
       eraNum: 2,
       era: "ERA II: RECONSTRUCTION & THE NADIR (1876)",
@@ -840,7 +1019,6 @@ html_content = """<!DOCTYPE html>
       ]
     },
 
-    // ERA III
     era3_1920s: {
       eraNum: 3,
       era: "ERA III: THE ROARING TWENTIES (1921)",
@@ -877,7 +1055,6 @@ html_content = """<!DOCTYPE html>
       ]
     },
 
-    // ERA IV
     era4_ww2: {
       eraNum: 4,
       era: "ERA IV: WORLD WAR II & REDLINING (1944–1948)",
@@ -910,7 +1087,6 @@ html_content = """<!DOCTYPE html>
       ]
     },
 
-    // ERA V
     era5_start: {
       eraNum: 5,
       era: "ERA V: CIVIL RIGHTS & BLACK POWER (1957)",
@@ -978,7 +1154,6 @@ html_content = """<!DOCTYPE html>
       ]
     },
 
-    // ERA VI
     era6_handoff: {
       eraNum: 6,
       era: "GENERATIONAL HANDOFF → ERA VI (1984)",
@@ -1055,6 +1230,11 @@ html_content = """<!DOCTYPE html>
           text: "Start Another Bloodline in 1754 (Spend Memory & Test New Path)",
           hint: "[New Run]",
           restart: true
+        },
+        {
+          text: "Return to Title Screen",
+          hint: "[Main Menu]",
+          toTitle: true
         }
       ]
     }
@@ -1069,6 +1249,7 @@ html_content = """<!DOCTYPE html>
     document.getElementById('stat-res').textContent = state.resilience;
     document.getElementById('stat-lev').textContent = state.leverage;
     document.getElementById('ui-mem').textContent = meta.memoryPoints;
+    document.getElementById('title-mem').textContent = meta.memoryPoints;
     document.getElementById('ui-arch').textContent = state.archive.length;
     document.getElementById('shop-mem-points').textContent = meta.memoryPoints;
     document.getElementById('death-mem-count').textContent = meta.memoryPoints;
@@ -1125,6 +1306,10 @@ html_content = """<!DOCTYPE html>
 
   function handleChoice(choice) {
     playTone(320, 'triangle', 0.14);
+    if (choice.toTitle) {
+      returnToTitle();
+      return;
+    }
     if (choice.restart) {
       restartRun();
       return;
@@ -1287,7 +1472,6 @@ html_content = """<!DOCTYPE html>
     state.leverage = origin.lev;
     state.cityChoice = "Tulsa";
 
-    // Apply permanent Ancestral Memory unlocks
     meta.unlockedPerks.forEach(pid => {
       const perk = perksCatalog.find(p => p.id === pid);
       if (perk) perk.apply(state);
@@ -1299,7 +1483,7 @@ html_content = """<!DOCTYPE html>
     renderNode('start', `New Bloodline Initialized: You begin in 1754 as ${origin.name}${perkNote}.`);
   }
 
-  // Boot game
+  // Initialize background state behind Title Screen
   renderMemoryShop();
   renderNode('start');
 </script>
@@ -1307,7 +1491,7 @@ html_content = """<!DOCTYPE html>
 </html>
 """
 
-with open("bloodline_deluxe_edition.html", "w", encoding="utf-8") as f:
+with open("index.html", "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print("Generated bloodline_deluxe_edition.html successfully.")
+print("Generated publish-ready index.html successfully.")
